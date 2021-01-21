@@ -1,0 +1,3 @@
+[mysqld]
+{% for param in item.value|default([]) %}{{ param.key }} = {{ param.value }}
+{% endfor %}

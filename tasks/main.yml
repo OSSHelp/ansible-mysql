@@ -1,0 +1,23 @@
+---
+- name: gather required facts
+  setup:
+    gather_subset: [min]
+  when: ansible_distribution_release is not defined
+
+- name: install
+  include_tasks: install.yml
+  when: mysql_setup == "full"
+
+- name: prepare initial-setup script
+  include_tasks: initial_setup.yml
+  when: initial_setup and mysql_setup == "full"
+
+- name: configuration
+  include_tasks: configuration.yml
+
+- name: root password
+  include_tasks: root.yml
+  when: root_password is defined
+
+- name: create databases and users
+  include_tasks: dbs_and_users.yml

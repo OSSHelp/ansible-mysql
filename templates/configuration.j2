@@ -1,0 +1,6 @@
+[mysqld]
+{% if mysql_versions[version].mysql_pidfile_path is defined %}
+pid_file = {{ mysql_versions[version].mysql_pidfile_path }}
+{% endif %}
+{% for param in params|default([]) %}{{ param.key }} = {{ param.value }}
+{% endfor %}

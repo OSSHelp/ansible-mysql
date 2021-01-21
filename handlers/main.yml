@@ -1,0 +1,7 @@
+---
+- name: reload mysql unit
+  systemd:
+    daemon_reload: true
+
+- name: restart mysql service
+  include_tasks: mysql_restart.yml

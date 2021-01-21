@@ -1,0 +1,26 @@
+---
+- name: configuration check
+  block:
+    - name: check mysql configuration
+      shell: mysqld --verbose --help >/dev/null
+      ignore_errors: true
+      register: mysql_syntax_check
+      changed_when: false
+
+    - name: show errors
+      debug:
+        msg: "{{ mysql_syntax_check.stderr_lines }}"
+      when: mysql_syntax_check.rc != 0
+
+    - name: Notify if bad syntax
+      assert:
+        that:
+          - mysql_syntax_check.rc == 0
+        fail_msg: "MySQL configuration check failed. You should check debug information above and fix the problem(s)."
+
+    - name: restart mysql service
+      service:
+        name: "{{ service }}"
+        state: restarted
+      when: mysql_syntax_check.rc == 0 and not mysql_no_restart
+  when: not ansible_check_mode

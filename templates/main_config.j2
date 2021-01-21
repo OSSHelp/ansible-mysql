@@ -1,0 +1,22 @@
+# Configuration file for {{ version }} version.
+{% if version == 'maria_10.4' %}
+!include /etc/mysql/mariadb.cnf
+{% endif %}
+!includedir /etc/mysql/conf.d/
+{% if version == 'percona_5.7' %}
+!includedir /etc/mysql/percona-server.conf.d/
+{% endif %}
+{% if version == 'default' %}
+!includedir /etc/mysql/mysql.conf.d/
+{% endif %}
+{% if version == 'community_5.7' %}
+!includedir /etc/mysql/mysql.conf.d/
+{% endif %}
+{% if version == 'community_8.0' %}
+!includedir /etc/mysql/mysql.conf.d/
+{% endif %}
+{% if version == 'community_latest' %}
+!includedir /etc/mysql/mysql.conf.d/
+{% endif %}
+!includedir {{ custom_conf_dir }}/
+!includedir {{ conf_enabled_dir }}/

@@ -1,0 +1,68 @@
+#!/bin/bash
+
+lib_path="/usr/local/include/osshelp/deploy-functions.sh"
+attempt=0
+
+current_profile='{{ templates_dir }}/profiles/current.yml'
+root_password="youshouldchangethepassword123!"
+my_cnf='/root/.my.cnf'
+datadir='/var/lib/mysql'
+logdir='/var/log/mysql'
+
+test -r "${lib_path}" || { echo "Library ${lib_path} doesn't exist!"; exit 1; }
+test -r "${lib_path}" && . "${lib_path}" "${@}"
+
+show_notice "Getting root user password from profile"
+test -r "${current_profile}" && \
+  root_password=$(get_value 'mysql.root-password' "${current_profile}" "${root_password}")
+
+grep -q "${root_password}" "${my_cnf}" 2>/dev/null || {
+  show_notice "Preparing cnf files"
+  make_file "${my_cnf}" "0600" "root:root" && {
+    echo "[client]" > "${my_cnf}"
+    echo "  user=root" >> "${my_cnf}"
+    echo "  password=${root_password}" >> "${my_cnf}"
+  }
+  ln -sf /root/.my.cnf /etc/mysql/debian.cnf
+}
+
+test -d "${logdir}" && {
+  chmod 750 "${logdir}"
+  chown mysql:adm "${logdir}"
+}
+test -d "${logdir}" || {
+  echo "Logdir not exist. Making logdir"
+  mkdir "${logdir}"
+  chmod 750 "${logdir}"
+  chown mysql:adm "${logdir}"
+}
+
+test -d "${datadir}" && {
+  test "$(ls -A ${datadir})" || {
+    show_notice "Datadir is empty. Initializing datadir"
+    {{ mysql_versions[version].datadir_init_command }} || exit 1
+
+    show_notice "Preparing mysqld"
+    sudo -u mysql mysqld_safe --skip-grant-tables &
+    mysqld_safe_pid=${!}
+    # mysqld needs time to start, should be changed to smth more sane
+    while [ "$(mysql -e "SHOW VARIABLES LIKE 'version';" >/dev/null 2>&1; echo $?)" != "0" ]; do
+      sleep 1
+      attempt=$((attempt+1))
+      test "${attempt}" -ge 60 && exit 1
+    done
+
+    key_exists_in_current_yml "mysql.root-host" && {
+      show_notice "Updating root user host"
+      root_host=$(get_value 'mysql.root-host' "${yml_current}")
+      mysql -u root -e "update user set host=\"${root_host}\" where User=\"root\" and Host=\"localhost\"" mysql
+    }
+
+    show_notice "Updating root user password"
+    mysql -u root -e "{{ mysql_versions[version].set_root_password_command }}; flush privileges;" mysql
+    killall -KILL mysql mysqld_safe mysqld
+    wait "${mysqld_safe_pid}"
+  }
+}
+
+exit 0

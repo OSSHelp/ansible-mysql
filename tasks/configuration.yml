@@ -1,0 +1,31 @@
+---
+- name: create custom conf directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0775
+  loop:
+    - "{{ custom_conf_dir }}"
+    - "{{ conf_available_dir }}"
+    - "{{ conf_enabled_dir }}"
+
+- name: deploy mysqld custom configuration
+  template:
+    src: configuration.j2
+    dest: "{{ custom_conf_file }}"
+    mode: 0644
+  notify: restart mysql service
+
+- name: deploy mysqld available configuration
+  template:
+    src: configuration_available.j2
+    dest: "{{ conf_available_dir }}/{{ item.key }}.cnf"
+    mode: 0644
+  loop: "{{ conf_available_params|dict2items }}"
+
+- name: deploy main config
+  template:
+    src: main_config.j2
+    dest: "{{ main_conf_file }}"
+    mode: 0644
+  notify: restart mysql service

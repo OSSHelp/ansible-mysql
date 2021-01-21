@@ -1,0 +1,73 @@
+---
+- name: install software-properties-common package
+  apt:
+    name: software-properties-common
+    update_cache: yes
+    cache_valid_time: 86400
+  when: mysql_versions[version].apt_repo is defined
+
+- name: add apt key
+  apt_key:
+    keyserver: "{{ mysql_versions[version].apt_keyserver|default('keyserver.ubuntu.com') }}"
+    id: "{{ mysql_versions[version].apt_keyid }}"
+  when: mysql_versions[version].apt_keyid is defined
+
+- name: add repo
+  apt_repository:
+    repo: "{{ mysql_versions[version].apt_repo }}"
+    filename: "{{ mysql_versions[version].apt_repo_name|default(version) }}"
+  when: mysql_versions[version].apt_repo is defined
+
+- name: set debconf
+  debconf:
+    name: mysql-apt-config
+    question: mysql-apt-config/select-server
+    value: "{{ mysql_versions[version].server }}"
+    vtype: select
+  register: debconf_set
+  when: mysql_versions[version].server is defined
+
+- name: install the required deb package
+  apt:
+    deb: "{{ mysql_versions[version].apt_repo_deb }}"
+  register: deb_package_install
+  when: mysql_versions[version].apt_repo_deb is defined
+
+- name: update apt cache
+  apt:
+    update_cache: yes
+  when: deb_package_install is changed or debconf_set is changed
+
+- name: run custom pre-installation command
+  command: "{{ mysql_versions[version].pre_install_command }}"
+  changed_when: false
+  when: mysql_versions[version].pre_install_command is defined
+
+- name: install mysql
+  apt:
+    name: "{{ mysql_versions[version].package }}"
+    update_cache: yes
+    cache_valid_time: 86400
+
+- name: enable service
+  service:
+    name: "{{ service }}"
+    enabled: yes
+
+- name: install default packages
+  apt:
+    name: "{{ default_packages }}"
+    update_cache: yes
+    cache_valid_time: 86400
+
+- name: install mysqltuner
+  get_url:
+    url: "{{ mysqltunner_url }}"
+    dest: /usr/local/sbin/mysqltuner.pl
+    mode: 0755
+
+- name: deploy logrotate config
+  template:
+    src: logrotate.j2
+    dest: "{{ mysql_logrotate_config }}"
+    mode: 0644

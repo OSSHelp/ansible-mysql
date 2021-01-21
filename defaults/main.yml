@@ -1,0 +1,132 @@
+---
+mysql_setup: full
+mysql_no_restart: true
+version: default
+
+default_packages:
+  - mytop
+  - percona-toolkit
+  - python-mysqldb
+  - python3-mysqldb
+
+mysqltunner_url: 'https://raw.githubusercontent.com/major/MySQLTuner-perl/master/mysqltuner.pl'
+mysql_pid_file: '/var/run/mysqld/mysqld.pid'
+
+mysql_datadir_init_command:
+  mysql_install_db: 'mysql_install_db --user=mysql --datadir="${datadir}"'
+  mysqld: 'sudo -u mysql mysqld --initialize'
+
+mysql_set_root_password_command:
+  password: 'update user set password=PASSWORD(\"${root_password}\") where User=\"root\"'
+  authentication_string: 'update user set authentication_string=PASSWORD(\"${root_password}\"), password_expired=\"N\" where User=\"root\"'
+
+mysql_versions:
+  default:
+    package: [mysql-server, percona-xtrabackup]
+    datadir_init_command: "{{ mysql_datadir_init_command.mysqld }}"
+    set_root_password_command: "{{ mysql_set_root_password_command.authentication_string }}"
+    systemd_unit_override_dir: "mysql.service.d"
+    mysql_pidfile_path: "{{ mysql_pid_file }}"
+  distr:
+    package: [mysql-server, percona-xtrabackup]
+    datadir_init_command: "{{ mysql_datadir_init_command.mysqld }}"
+    set_root_password_command: "{{ mysql_set_root_password_command.authentication_string }}"
+    systemd_unit_override_dir: "mysql.service.d"
+    mysql_pidfile_path: "{{ mysql_pid_file }}"
+  community_5.7:
+    apt_repo_deb: https://dev.mysql.com/get/mysql-apt-config_0.8.15-1_all.deb
+    server: mysql-5.7
+    package: [mysql-server, percona-xtrabackup]
+    datadir_init_command: "{{ mysql_datadir_init_command.mysqld }}"
+    set_root_password_command: "{{ mysql_set_root_password_command.authentication_string }}"
+    systemd_unit_override_dir: "mysql.service.d"
+    mysql_pidfile_path: "{{ mysql_pid_file }}"
+  community_8.0:
+    apt_repo_deb: https://dev.mysql.com/get/mysql-apt-config_0.8.15-1_all.deb
+    server: mysql-8.0
+    package: mysql-server
+    datadir_init_command: "{{ mysql_datadir_init_command.mysqld }}"
+    set_root_password_command: "{{ mysql_set_root_password_command.authentication_string }}"
+    systemd_unit_override_dir: "mysql.service.d"
+    mysql_pidfile_path: "{{ mysql_pid_file }}"
+  community_latest:
+    apt_repo_deb: https://dev.mysql.com/get/mysql-apt-config_0.8.15-1_all.deb
+    package: mysql-server
+    datadir_init_command: "{{ mysql_datadir_init_command.mysqld }}"
+    set_root_password_command: "{{ mysql_set_root_password_command.authentication_string }}"
+    systemd_unit_override_dir: "mysql.service.d"
+    mysql_pidfile_path: "{{ mysql_pid_file }}"
+  percona_5.5:
+    apt_repo_deb: https://repo.percona.com/apt/percona-release_latest.{{ ansible_distribution_release }}_all.deb
+    package: [percona-server-server-5.5, percona-xtrabackup]
+    datadir_init_command: "{{ mysql_datadir_init_command.mysql_install_db }}"
+    set_root_password_command: "{{ mysql_set_root_password_command.password }}"
+    systemd_unit_override_dir: "mysql.service.d"
+    mysql_pidfile_path: "{{ mysql_pid_file }}"
+  percona_5.6:
+    apt_repo_deb: https://repo.percona.com/apt/percona-release_latest.{{ ansible_distribution_release }}_all.deb
+    package: [percona-server-server-5.6, percona-xtrabackup]
+    datadir_init_command: "{{ mysql_datadir_init_command.mysql_install_db }}"
+    set_root_password_command: "{{ mysql_set_root_password_command.password }}"
+    systemd_unit_override_dir: "mysql.service.d"
+    mysql_pidfile_path: "{{ mysql_pid_file }}"
+  percona_5.7:
+    apt_repo_deb: https://repo.percona.com/apt/percona-release_latest.{{ ansible_distribution_release }}_all.deb
+    package: [percona-server-server-5.7, percona-xtrabackup]
+    datadir_init_command: "{{ mysql_datadir_init_command.mysqld }}"
+    set_root_password_command: "{{ mysql_set_root_password_command.authentication_string }}"
+    systemd_unit_override_dir: "mysql.service.d"
+    mysql_pidfile_path: "{{ mysql_pid_file }}"
+  percona_8.0:
+    apt_repo_deb: https://repo.percona.com/apt/percona-release_latest.{{ ansible_distribution_release }}_all.deb
+    pre_install_command: "percona-release setup ps80"
+    package: [percona-server-server, percona-xtrabackup-80]
+    datadir_init_command: "{{ mysql_datadir_init_command.mysqld }}"
+    set_root_password_command: "{{ mysql_set_root_password_command.authentication_string }}"
+    systemd_unit_override_dir: "mysql.service.d"
+    mysql_pidfile_path: "{{ mysql_pid_file }}"
+  maria_10.1:
+    apt_keyid: "0xF1656F24C74CD1D8"
+    apt_repo: "deb [arch=amd64] http://ams2.mirrors.digitalocean.com/mariadb/repo/10.1/ubuntu {{ ansible_distribution_release }} main"
+    package: [mariadb-server, mariadb-backup-10.1, percona-xtrabackup]
+    datadir_init_command: "{{ mysql_datadir_init_command.mysql_install_db }}"
+    set_root_password_command: "{{ mysql_set_root_password_command.password }}"
+    systemd_unit_override_dir: "mariadb.service.d"
+    mysql_pidfile_path: "{{ mysql_pid_file }}"
+  maria_10.2:
+    apt_keyid: "0xF1656F24C74CD1D8"
+    apt_repo: "deb [arch=amd64] http://ams2.mirrors.digitalocean.com/mariadb/repo/10.2/ubuntu {{ ansible_distribution_release }} main"
+    package: [mariadb-server, mariadb-backup-10.2, percona-xtrabackup]
+    datadir_init_command: "{{ mysql_datadir_init_command.mysql_install_db }}"
+    set_root_password_command: "{{ mysql_set_root_password_command.password }}"
+    systemd_unit_override_dir: "mariadb.service.d"
+    mysql_pidfile_path: "{{ mysql_pid_file }}"
+  maria_10.3:
+    apt_keyid: "0xF1656F24C74CD1D8"
+    apt_repo: "deb [arch=amd64] http://ams2.mirrors.digitalocean.com/mariadb/repo/10.3/ubuntu {{ ansible_distribution_release }} main"
+    package: [mariadb-server, mariadb-backup, percona-xtrabackup]
+    datadir_init_command: "{{ mysql_datadir_init_command.mysql_install_db }}"
+    set_root_password_command: "{{ mysql_set_root_password_command.password }}"
+    systemd_unit_override_dir: "mariadb.service.d"
+    mysql_pidfile_path: "{{ mysql_pid_file }}"
+  maria_10.4:
+    apt_keyid: "0xF1656F24C74CD1D8"
+    apt_repo: "deb [arch=amd64] http://ams2.mirrors.digitalocean.com/mariadb/repo/10.4/ubuntu {{ ansible_distribution_release }} main"
+    package: [mariadb-server, mariadb-backup, percona-xtrabackup]
+    datadir_init_command: "{{ mysql_datadir_init_command.mysql_install_db }}"
+    set_root_password_command: "{{ mysql_set_root_password_command.password }}"
+    systemd_unit_override_dir: "mariadb.service.d"
+    mysql_pidfile_path: "{{ mysql_pid_file }}"
+
+service: "{{ mysql_versions[version].service|default('mysql') }}"
+main_conf_file: "{{ mysql_versions[version].main_conf_file|default('/etc/mysql/my.cnf') }}"
+custom_conf_dir: "{{ mysql_versions[version].custom_conf_dir|default('/etc/mysql/custom.d') }}"
+custom_conf_file: "{{ custom_conf_dir }}/mysqld.cnf"
+conf_available_dir: "{{ mysql_versions[version].conf_available_dir|default('/etc/mysql/conf-available') }}"
+conf_available_params: {}
+conf_enabled_dir: "{{ mysql_versions[version].conf_enabled_dir|default('/etc/mysql/conf-enabled') }}"
+mysql_logrotate_config: /etc/logrotate.d/mysql-server
+
+initial_setup: false
+initial_setup_template: initial-setup.j2
+templates_dir: /usr/local/osshelp

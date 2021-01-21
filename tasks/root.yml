@@ -1,0 +1,22 @@
+---
+- name: set a root password
+  mysql_user:
+    user: root
+    password: "{{ root_password }}"
+    host_all: yes
+
+- name: create .my.cnf file
+  template:
+    src: my.cnf.j2
+    dest: /root/.my.cnf
+    mode: 0600
+
+- name: create lxhelper profile placeholders (workaround for initial_setup enabled)
+  template:
+    src: lxhelper_profile.j2
+    dest: "{{ item }}"
+    mode: 0600
+  when: initial_setup
+  loop:
+    - "{{ templates_dir }}/profiles/default.yml"
+    - "{{ templates_dir }}/profiles/current.yml"

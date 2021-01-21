@@ -1,0 +1,10 @@
+[Service]
+{% if 'maria' not in version and 'percona' not in version %}
+ExecStartPre=
+{% endif %}
+{% if ansible_distribution_release == 'bionic' %}
+ExecStartPre=+{{ templates_dir }}/mysql/initial-setup
+{% elif ansible_distribution_release == 'xenial' %}
+PermissionsStartOnly=true
+ExecStartPre={{ templates_dir }}/mysql/initial-setup
+{% endif %}
