@@ -4,6 +4,21 @@
 
 Installs MySQL Distr/MySQL Community/Percona/MariaDB plus management of configuration/databases/etc.
 
+## Available parameters
+
+### Main
+
+| Param | Default | Description |
+| -------- | -------- | -------- |
+| `mysql_setup` | `full` | Setup mode. See [OSSHelp KB article](https://oss.help/kb4895) |
+| `root_password` | `-` | MySQL root password. When defined .my.cnf will be genetated |
+| `params` | `[]` | MySQL common params |
+| `conf_available_params` | `[]` | MySQL conf-avalaible params |
+| `databases` | `[]` | List of databases you want to create |
+| `users` | `[]` | List of users you want to create |
+| `mysql_no_restart` | `true` | Param for enabling MySQL restart (disabled by default) |
+| `initial_setup` | `false` | When true initial-setup will be created (fixes for succesfully starting MySQL) |
+
 ## Deploy examples
 
 ### Install MySQL from dist repos
@@ -34,34 +49,13 @@ Valid values for `required-version-here`:
 - community_8.0
 - community_latest (installs latest available version)
 
-### Configure only mode
-
-``` yaml
-    - role: mysql
-      mysql_setup: configure
-```
-
-### Set root password and create .my.cnf file
-
-``` yaml
-    - role: mysql
-      root_password: "{{ password_from_vault }}"
-```
-
-### Set MySQL common params
-
-``` yaml
-    - role: mysql
-      params:
-        - {key: innodb_file_per_table, value: 'on'}
-```
-
-### Create conf-enabled MySQL params files
+### Set MySQL common params and create conf-enabled MySQL params files
 
 ``` yaml
     - role: mysql
       params:
         - {key: bind_address, value: 0.0.0.0}
+        - {key: innodb_file_per_table, value: 'on'}
       conf_available_params:
         prod:
           - {key: innodb_buffer_pool_size, value: '10G'}
@@ -85,9 +79,26 @@ For more information see [knowledge base article](https://rm.osshelp.ru/projects
 
 ```
 
+## FAQ
+
+### Wrong root password in .my.cnf
+
+If you see `youshouldchangethepassword123!` password in `/root/.my.cnf` , then your value for `initial_setup` is `true`, or you are using a MySQL base image. To set a password, define it in the lxhelper.yml in the profile section. See example below:
+
+``` yaml
+profiles:
+  default:
+    mysql:
+      root-password: {{mysql_root_password}}
+      root-host: '%'
+```
+
+### MySQL parameters are not being applied
+
+The parameters for MySQL are applied after service restart, to enable service restart use the parameter `mysql_no_restart`.
+
 ## TODO
 
-- add parameters documentation
 - split role
 - tests
 - percona 8, percona cluster
