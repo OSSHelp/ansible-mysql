@@ -8,6 +8,7 @@ root_password="youshouldchangethepassword123!"
 my_cnf='/root/.my.cnf'
 datadir='/var/lib/mysql'
 logdir='/var/log/mysql'
+rundir='/var/run/mysqld'
 
 test -r "${lib_path}" || { echo "Library ${lib_path} doesn't exist!"; exit 1; }
 test -r "${lib_path}" && . "${lib_path}" "${@}"
@@ -30,8 +31,14 @@ test -d "${logdir}" && {
   chmod 750 "${logdir}"
   chown mysql:adm "${logdir}"
 }
+test -d "${rundir}" || {
+  echo "Rundir does not exist. Preparing ${rundir}"
+  mkdir "${rundir}"
+  chown root:mysql "${rundir}"
+  chmod 770 "${rundir}"
+}
 test -d "${logdir}" || {
-  echo "Logdir not exist. Making logdir"
+  echo "Logdir does not exist. Preparing ${logdir}"
   mkdir "${logdir}"
   chmod 750 "${logdir}"
   chown mysql:adm "${logdir}"
@@ -61,7 +68,13 @@ test -d "${datadir}" && {
     show_notice "Updating root user password"
     mysql -u root -e "{{ mysql_versions[version].set_root_password_command }}; flush privileges;" mysql
     killall -KILL mysql mysqld_safe mysqld
+    # waiting for mysqld_safe and defunct processes
     wait "${mysqld_safe_pid}"
+    while [ "$(ps aux | grep -qE '[m]ysql.+defunct'; echo $?)" == "0" ]; do
+      sleep 1
+      attempt=$((attempt+1))
+      test "${attempt}" -ge 60 && exit 1
+    done
   }
 }
 

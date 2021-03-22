@@ -6,12 +6,11 @@ version: default
 default_packages:
   - mytop
   - percona-toolkit
-  - python-mysqldb
-  - python3-mysqldb
+  - "{{ 'python3-mysqldb' if ansible_distribution_release == 'focal' else 'python-mysqldb' }}"
 
 mysqltunner_url: 'https://raw.githubusercontent.com/major/MySQLTuner-perl/master/mysqltuner.pl'
 mysql_pid_file: '/var/run/mysqld/mysqld.pid'
-
+default_auth_plugin: 'mysql_native_password'
 mysql_datadir_init_command:
   mysql_install_db: 'mysql_install_db --user=mysql --datadir="${datadir}"'
   mysqld: 'sudo -u mysql mysqld --initialize'
@@ -19,30 +18,28 @@ mysql_datadir_init_command:
 mysql_set_root_password_command:
   password: 'update user set password=PASSWORD(\"${root_password}\") where User=\"root\"'
   authentication_string: 'update user set authentication_string=PASSWORD(\"${root_password}\"), password_expired=\"N\" where User=\"root\"'
+  alter_user: 'flush privileges; ALTER USER \"root\"@\"localhost\" IDENTIFIED BY \"${root_password}\"'
 
 mysql_versions:
   default:
-    package: [mysql-server, percona-xtrabackup]
+    apt_repo_deb: ["https://repo.percona.com/apt/percona-release_latest.{{ ansible_distribution_release }}_all.deb"]
+    package: [mysql-server, "{{ 'percona-xtrabackup-80' if ansible_distribution_release == 'focal' else 'percona-xtrabackup-24' }}"]
     datadir_init_command: "{{ mysql_datadir_init_command.mysqld }}"
-    set_root_password_command: "{{ mysql_set_root_password_command.authentication_string }}"
+    set_root_password_command: "{{ mysql_set_root_password_command.authentication_string if ansible_distribution_release != 'focal' else mysql_set_root_password_command.alter_user }}"
     systemd_unit_override_dir: "mysql.service.d"
     mysql_pidfile_path: "{{ mysql_pid_file }}"
-  distr:
-    package: [mysql-server, percona-xtrabackup]
-    datadir_init_command: "{{ mysql_datadir_init_command.mysqld }}"
-    set_root_password_command: "{{ mysql_set_root_password_command.authentication_string }}"
-    systemd_unit_override_dir: "mysql.service.d"
-    mysql_pidfile_path: "{{ mysql_pid_file }}"
+    pin_auth_plugin: true
   community_5.7:
-    apt_repo_deb: https://dev.mysql.com/get/mysql-apt-config_0.8.15-1_all.deb
+    apt_repo_deb: ["https://dev.mysql.com/get/mysql-apt-config_0.8.15-1_all.deb", "https://repo.percona.com/apt/percona-release_latest.{{ ansible_distribution_release }}_all.deb"]
     server: mysql-5.7
-    package: [mysql-server, percona-xtrabackup]
+    package: [mysql-server, percona-xtrabackup-24]
     datadir_init_command: "{{ mysql_datadir_init_command.mysqld }}"
-    set_root_password_command: "{{ mysql_set_root_password_command.authentication_string }}"
+    set_root_password_command: "{{ mysql_set_root_password_command.authentication_string if ansible_distribution_release != 'focal' else mysql_set_root_password_command.alter_user }}"
     systemd_unit_override_dir: "mysql.service.d"
     mysql_pidfile_path: "{{ mysql_pid_file }}"
+    pin_auth_plugin: true
   community_8.0:
-    apt_repo_deb: https://dev.mysql.com/get/mysql-apt-config_0.8.15-1_all.deb
+    apt_repo_deb: [https://dev.mysql.com/get/mysql-apt-config_0.8.15-1_all.deb]
     server: mysql-8.0
     package: mysql-server
     datadir_init_command: "{{ mysql_datadir_init_command.mysqld }}"
@@ -50,35 +47,35 @@ mysql_versions:
     systemd_unit_override_dir: "mysql.service.d"
     mysql_pidfile_path: "{{ mysql_pid_file }}"
   community_latest:
-    apt_repo_deb: https://dev.mysql.com/get/mysql-apt-config_0.8.15-1_all.deb
+    apt_repo_deb: [https://dev.mysql.com/get/mysql-apt-config_0.8.15-1_all.deb]
     package: mysql-server
     datadir_init_command: "{{ mysql_datadir_init_command.mysqld }}"
     set_root_password_command: "{{ mysql_set_root_password_command.authentication_string }}"
     systemd_unit_override_dir: "mysql.service.d"
     mysql_pidfile_path: "{{ mysql_pid_file }}"
   percona_5.5:
-    apt_repo_deb: https://repo.percona.com/apt/percona-release_latest.{{ ansible_distribution_release }}_all.deb
-    package: [percona-server-server-5.5, percona-xtrabackup]
+    apt_repo_deb: ["https://repo.percona.com/apt/percona-release_latest.{{ ansible_distribution_release }}_all.deb"]
+    package: [percona-server-server-5.5, percona-xtrabackup-24]
     datadir_init_command: "{{ mysql_datadir_init_command.mysql_install_db }}"
     set_root_password_command: "{{ mysql_set_root_password_command.password }}"
     systemd_unit_override_dir: "mysql.service.d"
     mysql_pidfile_path: "{{ mysql_pid_file }}"
   percona_5.6:
-    apt_repo_deb: https://repo.percona.com/apt/percona-release_latest.{{ ansible_distribution_release }}_all.deb
-    package: [percona-server-server-5.6, percona-xtrabackup]
+    apt_repo_deb: ["https://repo.percona.com/apt/percona-release_latest.{{ ansible_distribution_release }}_all.deb"]
+    package: [percona-server-server-5.6, percona-xtrabackup-24]
     datadir_init_command: "{{ mysql_datadir_init_command.mysql_install_db }}"
     set_root_password_command: "{{ mysql_set_root_password_command.password }}"
     systemd_unit_override_dir: "mysql.service.d"
     mysql_pidfile_path: "{{ mysql_pid_file }}"
   percona_5.7:
-    apt_repo_deb: https://repo.percona.com/apt/percona-release_latest.{{ ansible_distribution_release }}_all.deb
-    package: [percona-server-server-5.7, percona-xtrabackup]
+    apt_repo_deb: ["https://repo.percona.com/apt/percona-release_latest.{{ ansible_distribution_release }}_all.deb"]
+    package: [percona-server-server-5.7, percona-xtrabackup-24]
     datadir_init_command: "{{ mysql_datadir_init_command.mysqld }}"
     set_root_password_command: "{{ mysql_set_root_password_command.authentication_string }}"
     systemd_unit_override_dir: "mysql.service.d"
     mysql_pidfile_path: "{{ mysql_pid_file }}"
   percona_8.0:
-    apt_repo_deb: https://repo.percona.com/apt/percona-release_latest.{{ ansible_distribution_release }}_all.deb
+    apt_repo_deb: ["https://repo.percona.com/apt/percona-release_latest.{{ ansible_distribution_release }}_all.deb"]
     pre_install_command: "percona-release setup ps80"
     package: [percona-server-server, percona-xtrabackup-80]
     datadir_init_command: "{{ mysql_datadir_init_command.mysqld }}"
@@ -104,7 +101,8 @@ mysql_versions:
   maria_10.3:
     apt_keyid: "0xF1656F24C74CD1D8"
     apt_repo: "deb [arch=amd64] http://ams2.mirrors.digitalocean.com/mariadb/repo/10.3/ubuntu {{ ansible_distribution_release }} main"
-    package: [mariadb-server, mariadb-backup, percona-xtrabackup]
+    apt_repo_deb: ["https://repo.percona.com/apt/percona-release_latest.{{ ansible_distribution_release }}_all.deb"]
+    package: [mariadb-server, mariadb-backup, percona-xtrabackup-24]
     datadir_init_command: "{{ mysql_datadir_init_command.mysql_install_db }}"
     set_root_password_command: "{{ mysql_set_root_password_command.password }}"
     systemd_unit_override_dir: "mariadb.service.d"
@@ -112,7 +110,8 @@ mysql_versions:
   maria_10.4:
     apt_keyid: "0xF1656F24C74CD1D8"
     apt_repo: "deb [arch=amd64] http://ams2.mirrors.digitalocean.com/mariadb/repo/10.4/ubuntu {{ ansible_distribution_release }} main"
-    package: [mariadb-server, mariadb-backup, percona-xtrabackup]
+    apt_repo_deb: ["https://repo.percona.com/apt/percona-release_latest.{{ ansible_distribution_release }}_all.deb"]
+    package: [mariadb-server, mariadb-backup, percona-xtrabackup-24]
     datadir_init_command: "{{ mysql_datadir_init_command.mysql_install_db }}"
     set_root_password_command: "{{ mysql_set_root_password_command.password }}"
     systemd_unit_override_dir: "mariadb.service.d"

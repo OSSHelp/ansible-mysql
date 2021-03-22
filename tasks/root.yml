@@ -4,6 +4,16 @@
     user: root
     password: "{{ root_password }}"
     host_all: yes
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+  when: ansible_distribution_release == 'focal'
+
+- name: set a root password
+  mysql_user:
+    user: root
+    password: "{{ root_password }}"
+    host_all: yes
+  when: ansible_distribution_release != 'focal'
 
 - name: create .my.cnf file
   template:

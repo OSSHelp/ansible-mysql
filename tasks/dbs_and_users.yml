@@ -1,15 +1,41 @@
 ---
-- name: create databases
-  mysql_db:
-    name: "{{ item.name }}"
-    collation: "{{ item.collation | default('utf8_general_ci') }}"
-    encoding: "{{ item.encoding | default('utf8') }}"
-  loop: "{{ databases|default([]) }}"
 
-- name: create users
-  mysql_user:
-    name: "{{ item.name }}"
-    host: "{{ item.host | default('localhost') }}"
-    password: "{{ item.password }}"
-    priv: "{{ item.priv|default(item.name ~ '.*:ALL') }}"
-  loop: "{{ users|default([]) }}"
+- meta: flush_handlers
+
+- name: prepare databases and users
+  block:
+    - name: create databases
+      mysql_db:
+        name: "{{ item.name }}"
+        collation: "{{ item.collation | default('utf8_general_ci') }}"
+        encoding: "{{ item.encoding | default('utf8') }}"
+      loop: "{{ databases|default([]) }}"
+    - name: create users
+      mysql_user:
+        name: "{{ item.name }}"
+        host: "{{ item.host | default('localhost') }}"
+        password: "{{ item.password }}"
+        priv: "{{ item.priv|default(item.name ~ '.*:ALL') }}"
+      loop: "{{ users|default([]) }}"
+  when: ansible_distribution_release != 'focal'
+
+- name: prepare databases and users (focal)
+  block:
+    - name: create databases
+      mysql_db:
+        name: "{{ item.name }}"
+        collation: "{{ item.collation | default('utf8_general_ci') }}"
+        encoding: "{{ item.encoding | default('utf8') }}"
+      loop: "{{ databases|default([]) }}"
+      vars:
+        ansible_python_interpreter: /usr/bin/python3
+    - name: create users
+      mysql_user:
+        name: "{{ item.name }}"
+        host: "{{ item.host | default('localhost') }}"
+        password: "{{ item.password }}"
+        priv: "{{ item.priv|default(item.name ~ '.*:ALL') }}"
+      loop: "{{ users|default([]) }}"
+      vars:
+        ansible_python_interpreter: /usr/bin/python3
+  when: ansible_distribution_release == 'focal'

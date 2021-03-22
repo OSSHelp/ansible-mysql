@@ -1,4 +1,7 @@
 [mysqld]
+{% if ansible_distribution_release == 'focal' and mysql_versions[version].pin_auth_plugin is defined and mysql_versions[version].pin_auth_plugin %}
+default_authentication_plugin={{ default_auth_plugin }}
+{% endif %}
 {% if mysql_versions[version].mysql_pidfile_path is defined %}
 pid_file = {{ mysql_versions[version].mysql_pidfile_path }}
 {% endif %}

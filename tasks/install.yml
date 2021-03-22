@@ -29,8 +29,9 @@
 
 - name: install the required deb package
   apt:
-    deb: "{{ mysql_versions[version].apt_repo_deb }}"
+    deb: "{{ item }}"
   register: deb_package_install
+  loop: "{{ mysql_versions[version].apt_repo_deb }}"
   when: mysql_versions[version].apt_repo_deb is defined
 
 - name: update apt cache
@@ -65,6 +66,9 @@
     url: "{{ mysqltunner_url }}"
     dest: /usr/local/sbin/mysqltuner.pl
     mode: 0755
+  register: mysqltuner_installed
+  until: mysqltuner_installed is not failed
+  retries: 3
 
 - name: deploy logrotate config
   template:

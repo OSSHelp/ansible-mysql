@@ -102,7 +102,6 @@ The parameters for MySQL are applied after service restart, to enable service re
 - split role
 - tests
 - percona 8, percona cluster
-- focal support (percona-xtrabackup -> percona-xtrabackup-24, doesn't exist in distr repo)
 - increase sanity of root password changing mechanism (see initial-setup script)
 - installing root password mechanism is not working properly with percona_5.5 as version, needs to be tested and fixed
 - remove workaround for percona 8.0 installation (pre_install_command). See [documentation](https://www.percona.com/doc/percona-server/LATEST/installation/apt_repo.html)
