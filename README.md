@@ -45,6 +45,7 @@ Valid values for `required-version-here`:
 - maria_10.2
 - maria_10.3
 - maria_10.4
+- maria_10.5 (support for bionic and focal only)
 - community_5.7
 - community_8.0
 - community_latest (installs latest available version)
