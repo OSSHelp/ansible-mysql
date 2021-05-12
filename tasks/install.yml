@@ -83,6 +83,9 @@
     name: "{{ default_packages }}"
     update_cache: yes
     cache_valid_time: 86400
+  register: mysql_default_apt_res
+  retries: 5
+  until: mysql_default_apt_res is success
 
 - name: install mysqltuner
   get_url:
