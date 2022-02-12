@@ -31,6 +31,7 @@ mysql_versions:
     pin_auth_plugin: true
     mysql_client_host: localhost
   community_5.7:
+    apt_keyid: "0x467B942D3A79BD29"
     apt_repo_deb: ["https://dev.mysql.com/get/mysql-apt-config_0.8.15-1_all.deb", "https://repo.percona.com/apt/percona-release_latest.{{ ansible_distribution_release }}_all.deb"]
     server: mysql-5.7
     package: [mysql-server, percona-xtrabackup-24]
@@ -110,7 +111,7 @@ mysql_versions:
     mysql_client_host: localhost
   maria_10.3:
     apt_keyid: "0xF1656F24C74CD1D8"
-    apt_repo: "deb [arch=amd64] http://ams2.mirrors.digitalocean.com/mariadb/repo/10.3/ubuntu {{ ansible_distribution_release }} main"
+    apt_repo: "deb [arch=amd64] http://sfo1.mirrors.digitalocean.com/mariadb/repo/10.3/ubuntu {{ ansible_distribution_release }} main"
     apt_repo_deb: ["https://repo.percona.com/apt/percona-release_latest.{{ ansible_distribution_release }}_all.deb"]
     package: [mariadb-server, mariadb-backup, percona-xtrabackup-24]
     datadir_init_command: "{{ mysql_datadir_init_command.mysql_install_db }}"

@@ -110,3 +110,4 @@ The parameters for MySQL are applied after service restart, to enable service re
 - check and fix logic in initial-setup.j2. useless `test -r "${my_cnf}" && {`
 - check and fix systemd-override.j2 "ExecStartPre=" workaround. Add script from default ExecStartPre to initial-setup.j2
 - check and fix mysql_set_root_password_command for all releases
+- deal with periodical 404 errors on percona-server packages downloads from repo.percona.com
