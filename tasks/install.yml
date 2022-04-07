@@ -5,6 +5,8 @@
     update_cache: yes
     cache_valid_time: 86400
   when: mysql_versions[version].apt_repo is defined
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
 
 - name: add osshelp-testing repo
   block:
