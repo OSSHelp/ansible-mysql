@@ -42,11 +42,12 @@ mysql_versions:
     pin_auth_plugin: true
     mysql_client_host: localhost
   community_8.0:
-    apt_repo_deb: ["https://dev.mysql.com/get/mysql-apt-config_0.8.15-1_all.deb"]
+    apt_keyid: "467B942D3A79BD29"
+    apt_repo_deb: ["https://dev.mysql.com/get/mysql-apt-config_0.8.15-1_all.deb", "https://repo.percona.com/apt/percona-release_latest.{{ ansible_distribution_release }}_all.deb"]
     server: mysql-8.0
-    package: mysql-server
+    package: [mysql-server, percona-xtrabackup-80]
     datadir_init_command: "{{ mysql_datadir_init_command.mysqld }}"
-    set_root_password_command: "{{ mysql_set_root_password_command.authentication_string }}"
+    set_root_password_command: "{{ mysql_set_root_password_command.alter_user }}"
     systemd_unit_override_dir: "mysql.service.d"
     mysql_pidfile_path: "{{ mysql_pid_file }}"
     mysql_client_host: localhost

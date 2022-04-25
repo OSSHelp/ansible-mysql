@@ -5,6 +5,9 @@
   when: ansible_distribution_release is not defined
 
 - name: install
+  include_tasks: versions_check.yml
+
+- name: install
   include_tasks: install.yml
   when: mysql_setup == "full"
 

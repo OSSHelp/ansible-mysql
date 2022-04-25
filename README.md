@@ -45,8 +45,8 @@ Valid values for `required-version-here`:
 - maria_10.2
 - maria_10.3
 - maria_10.4
-- maria_10.5 (support for bionic and focal only)
-- community_5.7
+- maria_10.5 (bionic and focal only)
+- community_5.7 (xenial and bionic only)
 - community_8.0
 - community_latest (installs latest available version)
 
@@ -55,15 +55,15 @@ Valid values for `required-version-here`:
 ``` yaml
     - role: mysql
       params:
-        - {key: bind_address, value: 0.0.0.0}
-        - {key: innodb_file_per_table, value: 'on'}
+        - { key: bind_address, value: 0.0.0.0 }
+        - { key: innodb_file_per_table, value: 'on' }
       conf_available_params:
         prod:
-          - {key: innodb_buffer_pool_size, value: '10G'}
-          - {key: innodb_buffer_pool_instances, value: '10'}
+          - { key: innodb_buffer_pool_size, value: '10G' }
+          - { key: innodb_buffer_pool_instances, value: '10' }
         dev:
-          - {key: innodb_buffer_pool_size, value: '256M'}
-          - {key: innodb_buffer_pool_instances, value: '1'}
+          - { key: innodb_buffer_pool_size, value: '256M' }
+          - { key: innodb_buffer_pool_instances, value: '1' }
 ```
 
 For more information see [knowledge base article](https://rm.osshelp.ru/projects/support-servers/knowledgebase/articles/2254#MySQL).
@@ -106,7 +106,7 @@ The parameters for MySQL are applied after service restart, to enable service re
 - increase sanity of root password changing mechanism (see initial-setup script)
 - installing root password mechanism is not working properly with percona_5.5 as version, needs to be tested and fixed
 - remove workaround for percona 8.0 installation (pre_install_command). See [documentation](https://www.percona.com/doc/percona-server/LATEST/installation/apt_repo.html)
-- percona-8.0. Idempotence test fail for "mysql : create users"
+- Idempotence test fails for "mysql : create users" on MySQL v8.x.x (community and percona)
 - check and fix logic in initial-setup.j2. useless `test -r "${my_cnf}" && {`
 - check and fix systemd-override.j2 "ExecStartPre=" workaround. Add script from default ExecStartPre to initial-setup.j2
 - check and fix mysql_set_root_password_command for all releases

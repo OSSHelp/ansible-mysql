@@ -1,0 +1,11 @@
+---
+
+- name: Fail if MariaDB v10.5 is being installed to xenial
+  assert:
+    that: ansible_distribution_release != 'xenial'
+  when: version == 'maria_10.5'
+
+- name: Fail if community v5.7 is being installed to focal
+  assert:
+    that: ansible_distribution_release != 'focal'
+  when: version == 'community_5.7'
