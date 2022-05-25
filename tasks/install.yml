@@ -17,7 +17,7 @@
         cache_valid_time: 86400
     - name: add osshelp apt-key
       apt_key:
-        url: https://pkgs.osshelp.ru/public.key
+        url: https://pkgs.osshelp.io/public.key
         state: present
     - name: generate osshelp-900
       template:
@@ -25,7 +25,7 @@
         dest: /etc/apt/preferences.d/osshelp-900
     - name: add osshelp repository
       apt_repository:
-        repo: 'deb https://pkgs.osshelp.ru/ubuntu/ {{ ansible_distribution_release }}-testing main restricted universe multiverse'
+        repo: 'deb https://pkgs.osshelp.io/ubuntu/ {{ ansible_distribution_release }}-testing main restricted universe multiverse'
         state: present
         filename: osshelp-testing
         update_cache: true
