@@ -4,6 +4,8 @@
     name: software-properties-common
     update_cache: yes
     cache_valid_time: 86400
+  retries: 3
+  delay: 10
   when: mysql_versions[version].apt_repo is defined
   vars:
     ansible_python_interpreter: /usr/bin/python3
@@ -15,6 +17,8 @@
         name: apt-transport-https
         update_cache: yes
         cache_valid_time: 86400
+      retries: 3
+      delay: 10
     - name: add osshelp apt-key
       apt_key:
         url: https://pkgs.osshelp.io/public.key
@@ -55,6 +59,8 @@
 - name: install the required deb package
   apt:
     deb: "{{ item }}"
+  retries: 3
+  delay: 10
   register: deb_package_install
   loop: "{{ mysql_versions[version].apt_repo_deb }}"
   when: mysql_versions[version].apt_repo_deb is defined
