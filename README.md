@@ -41,11 +41,12 @@ Valid values for `required-version-here`:
 - percona_5.6
 - percona_5.7
 - percona_8.0
-- maria_10.1
-- maria_10.2
 - maria_10.3
 - maria_10.4
 - maria_10.5 (bionic and focal only)
+- maria_10.6 (bionic only)
+- maria_10.7 (bionic only)
+- maria_10.8 (bionic only)
 - community_5.7 (xenial and bionic only)
 - community_8.0
 - community_latest (installs latest available version)
